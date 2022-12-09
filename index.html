@@ -1,0 +1,87 @@
+<form name="test">
+    <label>left</label>
+    <input type="file" id="left_file"><br>
+    <label>right</label>
+    <input type="file" id="right_file"><br>
+    <table id="diff_table" border="1">
+        <thead>
+            <tr>
+                <th>index</th>
+                <th>key</th>
+                <th>value_left</th>
+                <th>value_right</th>
+            </tr>
+        </thead>
+        <tbody id="diff_t_body"></tbody>
+    </table>
+</form>
+
+<script>
+    console.log('log desu');
+    var left = document.getElementById("left_file");
+    var right = document.getElementById("right_file");
+    let tbody = document.getElementById("diff_t_body");
+    let keys = [];
+    let left_dict = {};
+    let right_dict = {};
+    const KV_SEPARATOR = '=';
+
+    function isComment(line){
+        return line.slice(0, 1) == ';' || line.slice(0, 1) == '['
+    }
+
+    function refreshDict(text, dict) {
+        console.log('refresh dict.')
+        lines = text.split(/\r\n/);
+        for (const line of lines) {
+            // skip comment.
+            if (isComment(line)) continue;
+            // skip empty line.
+            if (line.length === 0) continue;
+            // trim white space.
+            let trimmed = line.replace(/\s+/g, '')
+            let key = trimmed.substr(0, trimmed.indexOf(KV_SEPARATOR));
+            let value = trimmed.substr(trimmed.indexOf(KV_SEPARATOR) + 1);
+            if (keys.indexOf(key) === -1) keys.push(key);
+            dict[key] = value;
+        }
+    }
+
+    function refreshTable() {
+        console.log('refresh table.');
+        console.log(keys);
+        tbody.innerHTML = '';
+        for (const key of keys) {
+            console.log('key: ' + key);
+            console.log('L: ' + left_dict[key] ?? '')
+            console.log('R: ' + right_dict[key] ?? '')
+            tbody.insertRow().innerHTML = `<td>${key}</td><td>${left_dict[key] ?? ''}</td><td>${right_dict[key] ?? ''}</td>`;
+        }
+        console.log('refresh_end');
+    }
+
+    left.addEventListener("change", function (evt) {
+        console.debug('left_changed.')
+        let file = evt.target.files;
+        let reader = new FileReader();
+        reader.readAsText(file[0]);
+        reader.onload = function (ev) {
+            refreshDict(reader.result, left_dict)
+            console.log(left_dict);
+            refreshTable();
+        }
+    }, false);
+
+    right.addEventListener("change", function (evt) {
+        console.debug('right_changed.')
+        let file = evt.target.files;
+        let reader = new FileReader();
+        reader.readAsText(file[0]);
+        let lines;
+        reader.onload = function (ev) {
+            refreshDict(reader.result, right_dict)
+            console.log(right_dict);
+            refreshTable();
+        }
+    }, false);
+</script>
