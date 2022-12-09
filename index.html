@@ -6,7 +6,6 @@
     <table id="diff_table" border="1">
         <thead>
             <tr>
-                <th>index</th>
                 <th>key</th>
                 <th>value_left</th>
                 <th>value_right</th>
@@ -32,7 +31,7 @@
 
     function refreshDict(text, dict) {
         console.log('refresh dict.')
-        lines = text.split(/\r\n/);
+        lines = text.split(/\r\n|\n|\r/);
         for (const line of lines) {
             // skip comment.
             if (isComment(line)) continue;
@@ -55,7 +54,7 @@
             console.log('key: ' + key);
             console.log('L: ' + left_dict[key] ?? '')
             console.log('R: ' + right_dict[key] ?? '')
-            tbody.insertRow().innerHTML = `<td>${key}</td><td>${left_dict[key] ?? ''}</td><td>${right_dict[key] ?? ''}</td>`;
+            tbody.insertRow().innerHTML = `<td>${key}</td><td>${left_dict[key]}</td><td>${right_dict[key]}</td>`;
         }
         console.log('refresh_end');
     }
